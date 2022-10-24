@@ -23,6 +23,8 @@ class Document<T: JsonSpec> {
     private var changeID: ChangeID
     private var checkpoint: Checkpoint
     private var localChanges: [Change]
+//      private var eventStream: Observable<DocEvent>   // TODO: It will be implemented soon.
+//      private var eventStreamObserver!: Observer<DocEvent>   // TODO: It will be implemented soon.
 
     init(key: String) {
         self.key = key
@@ -30,6 +32,11 @@ class Document<T: JsonSpec> {
         self.changeID = ChangeID.initial
         self.checkpoint = Checkpoint.initial
         self.localChanges = []
+
+        // TODO: It will be implemented soon.
+//        self.eventStream = createObservable<DocEvent>((observer) => {
+//          self.eventStreamObserver = observer
+//        })
     }
 
     /**
@@ -50,8 +57,68 @@ class Document<T: JsonSpec> {
             self.localChanges.append(change)
             self.changeID = change.getID()
 
+            // TODO: It will be implemented soon.
+//        if (self.eventStreamObserver) {
+//          self.eventStreamObserver.next({
+//            type: DocEventType.LocalChange,
+//            value: [
+//              {
+//                change,
+//                paths: self.createPaths(change),
+//              },
+//            ],
+//          })
+//        }
+
             Logger.trivial("after update a local change: \(self.toJSON())")
         }
+    }
+
+    // TODO: It will be implemented soon.
+//    /**
+//     * `subscribe` adds the given observer to the fan-out list.
+//     */
+//    func subscribe(
+//      nextOrObserver: Observer<DocEvent> | NextFn<DocEvent>,
+//      error?: ErrorFn,
+//      complete?: CompleteFn,
+//    ): Unsubscribe {
+//      return self.eventStream.subscribe(nextOrObserver, error, complete)
+//    }
+
+    /**
+     * `applyChangePack` applies the given change pack into this document.
+     * 1. Remove local changes applied to server.
+     * 2. Update the checkpoint.
+     * 3. Do Garbage collection.
+     *
+     * - Parameter pack: change pack
+     */
+    func applyChangePack(pack: ChangePack) throws {
+        if pack.hasSnapshot() {
+            // TODO: It will be implemented soon.
+//        self.applySnapshot(pack.getCheckpoint().getServerSeq(),pack.getSnapshot()        )
+        } else if pack.hasChanges() {
+            try self.applyChanges(changes: pack.getChanges())
+        }
+
+        // 01. Remove local changes applied to server.
+        while self.localChanges.isEmpty == false {
+            let change = self.localChanges.removeFirst()
+            if change.getID().getClientSeq() > pack.getCheckpoint().getClientSeq() {
+                break
+            }
+        }
+
+        // 02. Update the checkpoint.
+        self.checkpoint.forward(other: pack.getCheckpoint())
+
+        // 03. Do Garbage collection.
+        if let ticket = pack.getMinSyncedTicket() {
+            self.garbageCollect(lessThanOrEqualTo: ticket)
+        }
+
+        Logger.trivial("\(self.root.toJSON())")
     }
 
     /**
@@ -176,6 +243,26 @@ class Document<T: JsonSpec> {
         return self.root.toSortedJSON()
     }
 
+    // TODO: to implement this
+//    /**
+//     * `applySnapshot` applies the given snapshot into this document.
+//     */
+//    func applySnapshot(serverSeq: Int64, snapshot: Data?) {
+//      let obj = converter.bytesToObject(snapshot)
+//      self.root = new CRDTRoot(obj)
+//      self.changeID = self.changeID.syncLamport(serverSeq)
+//
+//      // drop clone because it is contaminated.
+//      self.clone = undefined
+//
+//      if (self.eventStreamObserver) {
+//        self.eventStreamObserver.next({
+//          type: DocEventType.Snapshot,
+//          value: snapshot,
+//        })
+//      }
+//    }
+
     /**
      * `applyChanges` applies the given changes into this document.
      */
@@ -197,6 +284,19 @@ class Document<T: JsonSpec> {
             try $0.execute(root: self.root)
             self.changeID.syncLamport(with: $0.getID().getLamport())
         }
+
+        // TODO: It will be implemented soon.
+//      if (changes.isEmpty == false && self.eventStreamObserver) {
+//        self.eventStreamObserver.next({
+//          type: DocEventType.RemoteChange,
+//          value: changes.map((change) => {
+//            return {
+//              change,
+//              paths: self.createPaths(change),
+//            }
+//          }),
+//        })
+//      }
 
         Logger.debug(
             "after appling \(changes.count) remote changes.\n" +
