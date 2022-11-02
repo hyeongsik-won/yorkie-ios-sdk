@@ -13,6 +13,7 @@
 		9603ABBD291114DF00696E1A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9603ABBB291114DF00696E1A /* Main.storyboard */; };
 		9603ABBF291114E200696E1A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9603ABBE291114E200696E1A /* Assets.xcassets */; };
 		9603ABC2291114E200696E1A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9603ABC0291114E200696E1A /* LaunchScreen.storyboard */; };
+		CE95E41A291135E0005076C8 /* Yorkie.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE95E419291135E0005076C8 /* Yorkie.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,9 @@
 		9603ABBE291114E200696E1A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9603ABC1291114E200696E1A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		9603ABC3291114E200696E1A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		CE95E41529113593005076C8 /* Yorkie.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Yorkie.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE95E417291135C6005076C8 /* Yorkie.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Yorkie.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE95E419291135E0005076C8 /* Yorkie.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Yorkie.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,6 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE95E41A291135E0005076C8 /* Yorkie.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -42,6 +47,7 @@
 			children = (
 				9603ABB4291114DF00696E1A /* ExampleApp */,
 				9603ABB3291114DF00696E1A /* Products */,
+				CE95E41429113593005076C8 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -67,6 +73,16 @@
 			path = ExampleApp;
 			sourceTree = "<group>";
 		};
+		CE95E41429113593005076C8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CE95E419291135E0005076C8 /* Yorkie.framework */,
+				CE95E417291135C6005076C8 /* Yorkie.framework */,
+				CE95E41529113593005076C8 /* Yorkie.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -83,6 +99,8 @@
 			dependencies = (
 			);
 			name = ExampleApp;
+			packageProductDependencies = (
+			);
 			productName = ExampleApp;
 			productReference = 9603ABB2291114DF00696E1A /* ExampleApp.app */;
 			productType = "com.apple.product-type.application";
@@ -111,6 +129,8 @@
 				Base,
 			);
 			mainGroup = 9603ABA9291114DF00696E1A;
+			packageReferences = (
+			);
 			productRefGroup = 9603ABB3291114DF00696E1A /* Products */;
 			projectDirPath = "";
 			projectRoot = "";

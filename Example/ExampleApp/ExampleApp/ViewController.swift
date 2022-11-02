@@ -6,10 +6,13 @@
 //
 
 import UIKit
+import Yorkie
 
 class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        
+        let doc = Document(key: "test-doc")
+        
     }
 }
