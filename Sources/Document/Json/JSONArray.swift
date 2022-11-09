@@ -20,7 +20,7 @@ import Foundation
  * `JSONArray` represents JSON array, but unlike regular JSON, it has time
  * tickets created by a logical clock to resolve conflicts.
  */
-public class JSONArray {
+public actor JSONArray {
     static let notAppend = -1
     static let notFound = -1
 
@@ -87,8 +87,8 @@ public class JSONArray {
     /**
      * `insertAfter` inserts a value after the given previous element.
      */
-    func insertAfter(previousID: TimeTicket, value: Any) throws -> Any? {
-        let inserted = try insertAfterInternal(previousCreatedAt: previousID, value: value)
+    func insertAfter(previousID: TimeTicket, value: Any) async throws -> Any? {
+        let inserted = try await insertAfterInternal(previousCreatedAt: previousID, value: value)
         return toWrappedElement(from: inserted)
     }
 
@@ -96,8 +96,8 @@ public class JSONArray {
      * `insertBefore` inserts a value before the given next element.
      */
     @discardableResult
-    func insertBefore(nextID: TimeTicket, value: Any) throws -> Any? {
-        let inserted = try insertBeforeInternal(nextCreatedAt: nextID, value: value)
+    func insertBefore(nextID: TimeTicket, value: Any) async throws -> Any? {
+        let inserted = try await insertBeforeInternal(nextCreatedAt: nextID, value: value)
         return toWrappedElement(from: inserted)
     }
 
@@ -138,46 +138,46 @@ public class JSONArray {
 
     @discardableResult
     /// - Returns: The number of elements.
-    public func append(_ value: Any) -> Int {
-        self.push(value)
+    public func append(_ value: Any) async -> Int {
+        await self.push(value)
     }
 
-    public func append(values: [Any]) {
-        self.push(values: values)
+    public func append(values: [Any]) async {
+        await self.push(values: values)
     }
 
-    func push(values: [Any]) {
-        values.forEach { value in
-            push(value)
+    func push(values: [Any]) async {
+        for each in values {
+            await self.push(each)
         }
     }
 
     @discardableResult
     /// - Returns: The number of elements.
-    func push(_ value: Any) -> Int {
+    func push(_ value: Any) async -> Int {
         if let value = value as? YorkieJSONObjectable {
-            let length = self.push(JSONObject())
+            let length = await self.push(JSONObject())
             let appendedIndex = length - 1
             let jsonObject = self[appendedIndex] as? JSONObject
-            jsonObject?.set(value.toJsonObject)
+            await jsonObject?.set(value.toJsonObject)
             return length
         } else if let value = value as? [String: Any] {
-            let length = self.push(JSONObject())
+            let length = await self.push(JSONObject())
             let appendedIndex = length - 1
             let jsonObject = self[appendedIndex] as? JSONObject
-            jsonObject?.set(value)
+            await jsonObject?.set(value)
             return length
         } else if let value = value as? [Any] {
-            let length = self.push(JSONArray())
+            let length = await self.push(JSONArray())
             let appendedIndex = length - 1
             let jsonArray = self[appendedIndex] as? JSONArray
-            value.toJsonArray.forEach {
-                jsonArray?.push($0)
+            for each in value.toJsonArray {
+                await jsonArray?.push(each)
             }
 
             return length
         } else {
-            return self.pushInternal(value)
+            return await self.pushInternal(value)
         }
     }
 
@@ -196,8 +196,8 @@ public class JSONArray {
      */
     @discardableResult
     /// - Returns: The number of elements.
-    private func pushInternal(_ value: Any) -> Int {
-        let appendedElement = try? self.insertAfterInternal(previousCreatedAt: self.target.getLastCreatedAt(), value: value)
+    private func pushInternal(_ value: Any) async -> Int {
+        let appendedElement = try? await self.insertAfterInternal(previousCreatedAt: self.target.getLastCreatedAt(), value: value)
         guard appendedElement != nil else {
             return Self.notAppend
         }
@@ -255,7 +255,7 @@ public class JSONArray {
      * `insertAfterInternal` inserts the value after the previously created element.
      */
     @discardableResult
-    private func insertAfterInternal(previousCreatedAt: TimeTicket, value: Any) throws -> CRDTElement {
+    private func insertAfterInternal(previousCreatedAt: TimeTicket, value: Any) async throws -> CRDTElement {
         let ticket = self.context.issueTimeTicket()
 
         if let value = Primitive.type(of: value) {
@@ -283,7 +283,7 @@ public class JSONArray {
 
             let child = JSONArray(target: clone, changeContext: self.context)
             for element in array {
-                child.pushInternal(element)
+                await child.pushInternal(element)
             }
             return crdtArray
         } else if value is JSONArray {
@@ -316,8 +316,8 @@ public class JSONArray {
     /**
      * `insertBeforeInternal` inserts the value before the previously created element.
      */
-    private func insertBeforeInternal(nextCreatedAt: TimeTicket, value: Any) throws -> CRDTElement {
-        try self.insertAfterInternal(previousCreatedAt: self.target.getPreviousCreatedAt(createdAt: nextCreatedAt), value: value)
+    private func insertBeforeInternal(nextCreatedAt: TimeTicket, value: Any) async throws -> CRDTElement {
+        try await self.insertAfterInternal(previousCreatedAt: self.target.getPreviousCreatedAt(createdAt: nextCreatedAt), value: value)
     }
 
     /**
@@ -357,7 +357,7 @@ public class JSONArray {
      * `splice` is a method to remove elements from the array.
      */
     @discardableResult
-    func splice(start: Int, deleteCount: Int? = nil, items: Any...) throws -> [Any] {
+    func splice(start: Int, deleteCount: Int? = nil, items: Any...) async throws -> [Any] {
         let length = self.target.length
         let from = start >= 0 ? Swift.min(start, length) : Swift.max(length + start, 0)
 
@@ -391,7 +391,7 @@ public class JSONArray {
             }
 
             for item in items {
-                let newElement = try insertAfterInternal(previousCreatedAt: previousID, value: item)
+                let newElement = try await insertAfterInternal(previousCreatedAt: previousID, value: item)
                 previousID = newElement.getID()
             }
         }
@@ -417,7 +417,7 @@ public class JSONArray {
     /**
      * `includes` returns true if the given element is in the array.
      */
-    func includes(searchElement: Any, fromIndex: Int? = nil) -> Bool {
+    func includes(searchElement: Any, fromIndex: Int? = nil) async -> Bool {
         let length = self.target.length
 
         let from = self.adaptedFromIndex(length: length, fromIndex: fromIndex)
@@ -438,7 +438,7 @@ public class JSONArray {
             }
         }
 
-        guard let searchId = (searchElement as? JSONDatable)?.crdtElement.getID() else {
+        guard let searchId = await(searchElement as? JSONDatable)?.crdtElement.getID() else {
             return false
         }
 
@@ -457,7 +457,7 @@ public class JSONArray {
     /**
      * `indexOf` returns the index of the given element.
      */
-    func indexOf(_ searchElement: Any, fromIndex: Int? = nil) -> Int {
+    func indexOf(_ searchElement: Any, fromIndex: Int? = nil) async -> Int {
         let length = self.target.length
         let from = self.adaptedFromIndex(length: length, fromIndex: fromIndex)
 
@@ -478,7 +478,7 @@ public class JSONArray {
             } ?? Self.notFound
         }
 
-        guard let searchId = (searchElement as? JSONDatable)?.crdtElement.getID() else {
+        guard let searchId = await(searchElement as? JSONDatable)?.crdtElement.getID() else {
             return Self.notFound
         }
 
@@ -496,7 +496,7 @@ public class JSONArray {
     /**
      * `lastIndexOf` returns the last index of the given element.
      */
-    func lastIndexOf(_ searchElement: Any, fromIndex: Int? = nil) -> Int {
+    func lastIndexOf(_ searchElement: Any, fromIndex: Int? = nil) async -> Int {
         let length = self.target.length
 
         let from: Int
@@ -527,7 +527,7 @@ public class JSONArray {
             } ?? Self.notFound
         }
 
-        guard let searchId = (searchElement as? JSONDatable)?.crdtElement.getID() else {
+        guard let searchId = await(searchElement as? JSONDatable)?.crdtElement.getID() else {
             return Self.notFound
         }
 
@@ -546,6 +546,12 @@ public class JSONArray {
     var debugDescription: String {
         self.target.debugDescription
     }
+
+    public var iterator: [Any] {
+        self.target.compactMap {
+            ElementConverter.toJSONElement(from: $0, context: self.context)
+        }
+    }
 }
 
 extension JSONArray: JSONDatable {
@@ -563,40 +569,5 @@ extension JSONArray {
         self.target.compactMap {
             toJSONElement(from: $0)
         }
-    }
-}
-
-extension JSONArray: Sequence {
-    public typealias Element = Any
-
-    public func makeIterator() -> JSONArrayIterator {
-        return JSONArrayIterator(self.target, self.context)
-    }
-}
-
-public class JSONArrayIterator: IteratorProtocol {
-    private var values: [CRDTElement]
-    private var iteratorNext: Int = 0
-    private let context: ChangeContext
-
-    init(_ crdtArray: CRDTArray, _ context: ChangeContext) {
-        self.context = context
-        self.values = []
-        crdtArray.forEach { element in
-            values.append(element)
-        }
-    }
-
-    public func next() -> Any? {
-        defer {
-            self.iteratorNext += 1
-        }
-
-        guard self.iteratorNext < self.values.count else {
-            return nil
-        }
-
-        let value = self.values[self.iteratorNext]
-        return ElementConverter.toJSONElement(from: value, context: self.context)
     }
 }

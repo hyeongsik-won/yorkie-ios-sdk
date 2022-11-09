@@ -21,7 +21,7 @@ import Foundation
  * tickets created by a logical clock to resolve conflicts.
  */
 @dynamicMemberLookup
-public class JSONObject {
+public actor JSONObject {
     private var target: CRDTObject!
     private var context: ChangeContext!
 
@@ -32,13 +32,13 @@ public class JSONObject {
         self.context = context
     }
 
-    func set(_ values: [String: Any]) {
-        values.forEach { (key: String, value: Any) in
-            set(key: key, value: value)
+    func set(_ values: [String: Any]) async {
+        for (key, value) in values {
+            await self.set(key: key, value: value)
         }
     }
 
-    func set<T>(key: String, value: T) {
+    public func set<T>(key: String, value: T) async {
         if let optionalValue = value as? OptionalValue, optionalValue.isNil {
             self.setValueNull(key: key)
         } else if let value = value as? Bool {
@@ -59,13 +59,13 @@ public class JSONObject {
             let object = CRDTObject(createdAt: self.context.issueTimeTicket())
             self.setValue(key: key, value: object)
         } else if let value = value as? [String: Any] {
-            self.set(key: key, value: JSONObject())
+            await self.set(key: key, value: JSONObject())
             let jsonObject = self.get(key: key) as? JSONObject
-            jsonObject?.set(value)
+            await jsonObject?.set(value)
         } else if let value = value as? YorkieJSONObjectable {
-            self.set(key: key, value: JSONObject())
+            await self.set(key: key, value: JSONObject())
             let jsonObject = self.get(key: key) as? JSONObject
-            jsonObject?.set(value.toJsonObject)
+            await jsonObject?.set(value.toJsonObject)
         } else if value is JSONArray {
             let array = CRDTArray(createdAt: self.context.issueTimeTicket())
             self.setValue(key: key, value: array)
@@ -73,7 +73,7 @@ public class JSONObject {
             let array = CRDTArray(createdAt: self.context.issueTimeTicket())
             self.setValue(key: key, value: array)
             let jsonArray = self.get(key: key) as? JSONArray
-            jsonArray?.append(values: value.toJsonArray)
+            await jsonArray?.append(values: value.toJsonArray)
         } else {
             Logger.error("The value is not supported. - key: \(key): value: \(value)")
         }
@@ -175,12 +175,7 @@ public class JSONObject {
     }
 
     public subscript(key: String) -> Any? {
-        get {
-            self.get(key: key)
-        }
-        set {
-            self.set(key: key, value: newValue)
-        }
+        self.get(key: key)
     }
 
     /**
@@ -197,7 +192,7 @@ public class JSONObject {
         self.target.toJSON()
     }
 
-    private func toSortedJSON() -> String {
+    func toSortedJSON() -> String {
         self.target.toSortedJSON()
     }
 
@@ -205,18 +200,6 @@ public class JSONObject {
         return self.target.map { (key: String, value: CRDTElement) in
             (key, value)
         }
-    }
-}
-
-extension JSONObject: CustomStringConvertible {
-    public var description: String {
-        self.toJson()
-    }
-}
-
-extension JSONObject: CustomDebugStringConvertible {
-    public var debugDescription: String {
-        self.toSortedJSON()
     }
 }
 
@@ -232,11 +215,6 @@ extension JSONObject: JSONDatable {
 
 public extension JSONObject {
     subscript(dynamicMember member: String) -> Any? {
-        get {
-            self.get(key: member)
-        }
-        set {
-            self.set(key: member, value: newValue)
-        }
+        self.get(key: member)
     }
 }

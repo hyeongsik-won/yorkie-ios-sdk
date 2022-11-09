@@ -16,7 +16,7 @@
 
 import Foundation
 
-protocol JSONDatable {
+protocol JSONDatable: Actor {
     var changeContext: ChangeContext { get }
     var crdtElement: CRDTElement { get }
 }

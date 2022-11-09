@@ -41,7 +41,7 @@ class ChangePack {
      * `minSyncedTicket` is the minimum logical time taken by clients who attach
      * the document. It used to collect garbage on the replica on the client.
      */
-    private var minSyncedTicket: TimeTicket?
+    private let minSyncedTicket: TimeTicket?
 
     init(key: String, checkpoint: Checkpoint, changes: [Change], snapshot: Data? = nil, minSyncedTicket: TimeTicket? = nil) {
         self.documentKey = key

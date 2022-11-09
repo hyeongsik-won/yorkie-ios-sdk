@@ -42,16 +42,16 @@ final class ClientIntegrationTests: XCTestCase {
 
         self.d1 = Document(key: docKey)
         await self.d1.update { root in
-            root.k1 = ""
-            root.k2 = ""
-            root.k3 = ""
+            await root.set(key: "k1", value: "")
+            await root.set(key: "k2", value: "")
+            await root.set(key: "k3", value: "")
         }
 
         self.d2 = Document(key: docKey)
         await self.d1.update { root in
-            root.k1 = ""
-            root.k2 = ""
-            root.k3 = ""
+            await root.set(key: "k1", value: "")
+            await root.set(key: "k2", value: "")
+            await root.set(key: "k3", value: "")
         }
 
         try await self.c1.activate()
@@ -61,7 +61,7 @@ final class ClientIntegrationTests: XCTestCase {
         try await self.c2.attach(self.d2, true)
 
         await self.d1.update { root in
-            root.k1 = "v1"
+            await root.set(key: "k1", value: "v1")
         }
 
         try await self.c1.sync()
@@ -71,7 +71,7 @@ final class ClientIntegrationTests: XCTestCase {
         XCTAssert(result == "v1")
 
         await self.d1.update { root in
-            root.k2 = "v2"
+            await root.set(key: "k2", value: "v2")
         }
 
         try await self.c1.sync()
@@ -81,7 +81,7 @@ final class ClientIntegrationTests: XCTestCase {
         XCTAssert(result == "v2")
 
         await self.d1.update { root in
-            root.k3 = "v3"
+            await root.set(key: "k3", value: "v3")
         }
 
         try await self.c1.sync()
@@ -111,16 +111,16 @@ final class ClientIntegrationTests: XCTestCase {
 
         self.d1 = Document(key: docKey)
         await self.d1.update { root in
-            root.k1 = ""
-            root.k2 = ""
-            root.k3 = ""
+            await root.set(key: "k1", value: "")
+            await root.set(key: "k2", value: "")
+            await root.set(key: "k3", value: "")
         }
 
         self.d2 = Document(key: docKey)
         await self.d1.update { root in
-            root.k1 = ""
-            root.k2 = ""
-            root.k3 = ""
+            await root.set(key: "k1", value: "")
+            await root.set(key: "k2", value: "")
+            await root.set(key: "k3", value: "")
         }
 
         try await self.c1.activate()
@@ -134,7 +134,7 @@ final class ClientIntegrationTests: XCTestCase {
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
         await self.d1.update { root in
-            root.k1 = "v1"
+            await root.set(key: "k1", value: "v1")
         }
 
         try await Task.sleep(nanoseconds: 1_000_000_000)
@@ -143,7 +143,7 @@ final class ClientIntegrationTests: XCTestCase {
         XCTAssert(result == "v1")
 
         await self.d1.update { root in
-            root.k2 = "v2"
+            await root.set(key: "k2", value: "v2")
         }
 
         try await Task.sleep(nanoseconds: 1_000_000_000)
@@ -152,7 +152,7 @@ final class ClientIntegrationTests: XCTestCase {
         XCTAssert(result == "v2")
 
         await self.d1.update { root in
-            root.k3 = "v3"
+            await root.set(key: "k3", value: "v3")
         }
 
         try await Task.sleep(nanoseconds: 1_000_000_000)

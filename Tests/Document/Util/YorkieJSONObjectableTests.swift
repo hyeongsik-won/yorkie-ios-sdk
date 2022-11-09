@@ -42,9 +42,10 @@ class YorkieJSONObjectableTests: XCTestCase {
 
         let doc = Document(key: "test")
         await doc.update { root in
-            root.lists = lists
+            await root.set(key: "lists", value: lists)
 
-            XCTAssertEqual(root.debugDescription,
+            let result = await root.toSortedJSON()
+            XCTAssertEqual(result,
                            """
                            {"lists":[{"cards":[{"title":"a-1"},{"title":"a-2"}],"title":"a"},{"cards":[{"title":"b-1"},{"title":"b-2"}],"title":"b"}]}
                            """)

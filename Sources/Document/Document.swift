@@ -45,12 +45,12 @@ public actor Document {
     /**
      * `update` executes the given updater to update this document.
      */
-    public func update(updater: (_ root: JSONObject) -> Void, message: String? = nil) {
+    public func update(updater: (_ root: JSONObject) async -> Void, message: String? = nil) async {
         let clone = self.cloned()
         let context = ChangeContext(id: self.changeID.next(), root: clone, message: message)
 
         let proxy = JSONObject(target: clone.getObject(), context: context)
-        updater(proxy)
+        await updater(proxy)
 
         if context.hasOperations() {
             Logger.trivial("trying to update a local change: \(self.toJSON())")
@@ -76,26 +76,26 @@ public actor Document {
      *
      * - Parameter pack: change pack
      */
-    func applyChangePack(pack: ChangePack) throws {
-        if let snapshot = pack.getSnapshot() {
-            try self.applySnapshot(serverSeq: pack.getCheckpoint().getServerSeq(), snapshot: snapshot)
-        } else if pack.hasChanges() {
-            try self.applyChanges(changes: pack.getChanges())
+    func applyChangePack(pack: ChangePack) async throws {
+        if let snapshot = await pack.getSnapshot() {
+            try await self.applySnapshot(serverSeq: pack.getCheckpoint().getServerSeq(), snapshot: snapshot)
+        } else if await pack.hasChanges() {
+            try await self.applyChanges(changes: pack.getChanges())
         }
 
         // 01. Remove local changes applied to server.
         while self.localChanges.isEmpty == false {
             let change = self.localChanges.removeFirst()
-            if change.getID().getClientSeq() > pack.getCheckpoint().getClientSeq() {
+            if await change.getID().getClientSeq() > pack.getCheckpoint().getClientSeq() {
                 break
             }
         }
 
         // 02. Update the checkpoint.
-        self.checkpoint.forward(other: pack.getCheckpoint())
+        await self.checkpoint.forward(other: pack.getCheckpoint())
 
         // 03. Do Garbage collection.
-        if let ticket = pack.getMinSyncedTicket() {
+        if let ticket = await pack.getMinSyncedTicket() {
             self.garbageCollect(lessThanOrEqualTo: ticket)
         }
 
@@ -121,7 +121,7 @@ public actor Document {
     /**
      * `ensureClone` make a clone of root.
      */
-    func cloned() -> CRDTRoot {
+    private func cloned() -> CRDTRoot {
         if let clone = self.clone {
             return clone
         }
@@ -168,7 +168,7 @@ public actor Document {
      * `getClone` return clone object.
      *
      */
-    func getClone() -> CRDTObject? {
+    private func getClone() -> CRDTObject? {
         return self.clone?.getObject()
     }
 
@@ -198,7 +198,7 @@ public actor Document {
      * `getRootObject` returns root object.
      *
      */
-    func getRootObject() -> CRDTObject {
+    private func getRootObject() -> CRDTObject {
         return self.root.getObject()
     }
 

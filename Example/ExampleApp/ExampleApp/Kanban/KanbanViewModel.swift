@@ -49,18 +49,22 @@ class KanbanViewModel: ObservableObject {
                 Task { @MainActor [weak self] in
                     guard let self, let lists = await self.document.getRoot().lists as? JSONArray else { return }
 
-                    self.columns = lists.compactMap { each -> KanbanColumn? in
+                    var columns: [KanbanColumn] = []
+                    for each in await lists.iterator {
                         guard let column = each as? JSONObject,
-                              let cardArray = column.cards as? JSONArray
+                              let cardArray = await column.cards as? JSONArray
                         else {
-                            return nil
+                            continue
                         }
 
-                        let cards = cardArray.compactMap { each -> KanbanCard? in
-                            guard let card = each as? JSONObject else { return nil }
-                            return KanbanCard(id: card.getID(), columnId: column.getID(), title: card.title as! String)
+                        var cards = [KanbanCard]()
+                        for each in await cardArray.iterator {
+                            guard let card = each as? JSONObject else { continue }
+                            cards.append(await KanbanCard(id: card.getID(), columnId: column.getID(), title: card.title as! String))
                         }
-                        return KanbanColumn(id: column.getID(), title: column.title as! String, cards: cards)
+
+                        columns.append(await KanbanColumn(id: column.getID(), title: column.title as! String, cards: cards))
+                        self.columns = columns
                     }
                 }
             }.store(in: &self.cancellables)
@@ -80,14 +84,14 @@ class KanbanViewModel: ObservableObject {
     func addColumn(title: String) {
         Task {
             await self.document.update { root in
-                var lists = root.lists as? JSONArray
+                var lists = await root.lists as? JSONArray
                 if lists == nil {
-                    root.lists = []
-                    lists = root.lists as? JSONArray
+                    await root.set(key: "lists", value: [])
+                    lists = await root.lists as? JSONArray
                 }
 
                 let column = KanbanColumn(title: title)
-                lists!.append(column)
+                await lists!.append(column)
             }
         }
     }
@@ -95,8 +99,8 @@ class KanbanViewModel: ObservableObject {
     func deleteColumn(_ column: KanbanColumn) {
         Task {
             await self.document.update { root in
-                guard let lists = root.lists as? JSONArray else { return }
-                lists.remove(byID: column.id)
+                guard let lists = await root.lists as? JSONArray else { return }
+                await lists.remove(byID: column.id)
             }
         }
     }
@@ -104,15 +108,15 @@ class KanbanViewModel: ObservableObject {
     func addCard(title: String, columnId: TimeTicket) {
         Task {
             await self.document.update { root in
-                guard let lists = root.lists as? JSONArray,
-                      let column = lists.getElement(byID: columnId) as? JSONObject,
-                      let cards = column.cards as? JSONArray
+                guard let lists = await root.lists as? JSONArray,
+                      let column = await lists.getElement(byID: columnId) as? JSONObject,
+                      let cards = await column.cards as? JSONArray
                 else {
                     return
                 }
 
                 let card = KanbanCard(columnId: columnId, title: title)
-                cards.append(card)
+                await cards.append(card)
             }
         }
     }
@@ -120,14 +124,14 @@ class KanbanViewModel: ObservableObject {
     func deleteCard(_ card: KanbanCard) {
         Task {
             await self.document.update { root in
-                guard let lists = root.lists as? JSONArray,
-                      let column = lists.getElement(byID: card.columnId) as? JSONObject,
-                      let cards = column.cards as? JSONArray
+                guard let lists = await root.lists as? JSONArray,
+                      let column = await lists.getElement(byID: card.columnId) as? JSONObject,
+                      let cards = await column.cards as? JSONArray
                 else {
                     return
                 }
 
-                cards.remove(byID: card.id)
+                await cards.remove(byID: card.id)
             }
         }
     }
