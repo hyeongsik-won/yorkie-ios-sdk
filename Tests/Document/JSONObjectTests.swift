@@ -168,7 +168,7 @@ class JSONObjectTests: XCTestCase {
     }
 
     struct JsonArrayTestType: YorkieJSONObjectable {
-        let id: Int64 = 200
+        var id: Int64 = 200
     }
 
     func test_can_insert_obejct() async {
