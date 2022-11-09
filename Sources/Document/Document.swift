@@ -46,10 +46,10 @@ public actor Document {
      * `update` executes the given updater to update this document.
      */
     public func update(updater: (_ root: JSONObject) -> Void, message: String? = nil) {
-        let clone = self.cloned()
+        let clone = self.cloned
         let context = ChangeContext(id: self.changeID.next(), root: clone, message: message)
 
-        let proxy = JSONObject(target: clone.getObject(), context: context)
+        let proxy = JSONObject(target: clone.object, context: context)
         updater(proxy)
 
         if context.hasOperations() {
@@ -103,14 +103,6 @@ public actor Document {
     }
 
     /**
-     * `getCheckpoint` returns the checkpoint of this document.
-     *
-     */
-    func getCheckpoint() -> Checkpoint {
-        return self.checkpoint
-    }
-
-    /**
      * `hasLocalChanges` returns whether this document has local changes or not.
      *
      */
@@ -121,7 +113,7 @@ public actor Document {
     /**
      * `ensureClone` make a clone of root.
      */
-    func cloned() -> CRDTRoot {
+    var cloned: CRDTRoot {
         if let clone = self.clone {
             return clone
         }
@@ -157,7 +149,7 @@ public actor Document {
     }
 
     /**
-     * `getKey` returns the key of this document.
+     * `key` returns the key of this document.
      *
      */
     nonisolated func getKey() -> String {
@@ -169,17 +161,17 @@ public actor Document {
      *
      */
     func getClone() -> CRDTObject? {
-        return self.clone?.getObject()
+        return self.clone?.object
     }
 
     /**
      * `getRoot` returns a new proxy of cloned root.
      */
     public func getRoot() -> JSONObject {
-        let clone = self.cloned()
+        let clone = self.cloned
         let context = ChangeContext(id: self.changeID.next(), root: clone)
 
-        return JSONObject(target: clone.getObject(), context: context)
+        return JSONObject(target: clone.object, context: context)
     }
 
     /**
@@ -199,7 +191,7 @@ public actor Document {
      *
      */
     func getRootObject() -> CRDTObject {
-        return self.root.getObject()
+        return self.root.object
     }
 
     /**
@@ -207,7 +199,7 @@ public actor Document {
      *
      */
     func getGarbageLength() -> Int {
-        return self.root.getGarbageLength()
+        return self.root.garbageLength
     }
 
     /**
@@ -246,13 +238,13 @@ public actor Document {
         Logger.debug(
             """
             trying to apply \(changes.count) remote changes.
-            elements:\(self.root.getElementMapSize()),
-            removeds:\(self.root.getRemovedElementSetSize())
+            elements:\(self.root.elementMapSize),
+            removeds:\(self.root.removedElementSetSize)
             """)
 
-        Logger.trivial(changes.map { "\($0.getID().getStructureAsString())\t\($0.getStructureAsString())" }.joined(separator: "\n"))
+        Logger.trivial(changes.map { "\($0.getID().structureAsString)\t\($0.structureAsString)" }.joined(separator: "\n"))
 
-        let clone = self.cloned()
+        let clone = self.cloned
         try changes.forEach {
             try $0.execute(root: clone)
         }
@@ -272,16 +264,16 @@ public actor Document {
         Logger.debug(
             """
             after appling \(changes.count) remote changes.
-            elements:\(self.root.getElementMapSize()),
-            removeds:\(self.root.getRemovedElementSetSize())
+            elements:\(self.root.elementMapSize),
+            removeds:\(self.root.removedElementSetSize)
             """
         )
     }
 
     private func createPaths(change: Change) -> [String] {
         let pathTrie = Trie<String>(value: "$")
-        for op in change.getOperations() {
-            let createdAt = op.getEffectedCreatedAt()
+        for op in change.operations {
+            let createdAt = op.effectedCreatedAt
             if var subPaths = try? self.root.createSubPaths(createdAt: createdAt), subPaths.isEmpty == false {
                 subPaths.removeFirst()
                 pathTrie.insert(values: subPaths)

@@ -23,10 +23,10 @@ class Change {
     private var id: ChangeID
 
     // `operations` represent a series of user edits.
-    private let operations: [Operation]
+    let operations: [Operation]
 
     // `message` is used to save a description of the change.
-    private let message: String?
+    let message: String?
 
     init(id: ChangeID, operations: [Operation], message: String? = nil) {
         self.id = id
@@ -35,24 +35,10 @@ class Change {
     }
 
     /**
-     * `getID` returns the ID of this change.
+     * `id` returns the ID of this change.
      */
     func getID() -> ChangeID {
         return self.id
-    }
-
-    /**
-     * `getMessage` returns the message of this change.
-     */
-    func getMessage() -> String? {
-        return self.message
-    }
-
-    /**
-     * `getOperations` returns the operations of this change.
-     */
-    func getOperations() -> [Operation] {
-        return self.operations
     }
 
     /**
@@ -76,11 +62,11 @@ class Change {
     }
 
     /**
-     * `getStructureAsString` returns a String containing the meta data of this change.
+     * `structureAsString` returns a String containing the meta data of this change.
      */
-    func getStructureAsString() -> String {
+    var structureAsString: String {
         return self.operations
-            .map { $0.getStructureAsString() }
+            .map { $0.structureAsString }
             .joined(separator: ",")
     }
 }

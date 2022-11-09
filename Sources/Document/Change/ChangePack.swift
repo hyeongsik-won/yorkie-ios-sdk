@@ -52,7 +52,7 @@ class ChangePack {
     }
 
     /**
-     * `getKey` returns the document key of this pack.
+     * `key` returns the document key of this pack.
      */
     func getDocumentKey() -> String {
         return self.documentKey
