@@ -156,7 +156,7 @@ class JSONObjectTests: XCTestCase {
         }
     }
 
-    struct JsonObejctTestType: YorkieJSONObjectable {
+    private struct JsonObejctTestType: YorkieJSONObjectable {
         var id: Int64 = 100
         var type: String = "struct"
         var serial: Int32 = 1234
@@ -167,7 +167,7 @@ class JSONObjectTests: XCTestCase {
         }
     }
 
-    struct JsonArrayTestType: YorkieJSONObjectable {
+    private struct JsonArrayTestType: YorkieJSONObjectable {
         var id: Int64 = 200
     }
 
@@ -179,6 +179,26 @@ class JSONObjectTests: XCTestCase {
             XCTAssertEqual(root.debugDescription,
                            """
                            {"object":{"array":[{"id":200}],"id":100,"type":"struct"}}
+                           """)
+        }
+    }
+
+    func test_can_get_by_keyPath() async {
+        let target = Document(key: "doc1")
+        await target.update { root in
+            root.object = JsonObejctTestType()
+
+            XCTAssertEqual(root.debugDescription,
+                           """
+                           {"object":{"array":[{"id":200}],"id":100,"type":"struct"}}
+                           """)
+
+            let array = root[keyPath: "object/.^/array"] as? JSONArray
+            array!.append(JsonArrayTestType(id: 300))
+
+            XCTAssertEqual(root.debugDescription,
+                           """
+                           {"object":{"array":[{"id":200},{"id":300}],"id":100,"type":"struct"}}
                            """)
         }
     }
