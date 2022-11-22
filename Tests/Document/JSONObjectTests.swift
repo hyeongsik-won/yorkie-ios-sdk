@@ -202,23 +202,43 @@ class JSONObjectTests: XCTestCase {
                            """)
         }
     }
-    
+
+    private struct JSONObject0: JSONObjectable {
+        let first: JSONObject1
+    }
+
+    private struct JSONObject1: JSONObjectable {
+        let second: JSONObject2
+    }
+
+    private struct JSONObject2: JSONObjectable {
+        let third: JSONObject3
+    }
+
+    private struct JSONObject3: JSONObjectable {
+        let value: String
+    }
+
     func test_can_get_by_long_keyPath() async {
         let target = Document(key: "doc1")
         await target.update { root in
-            root.object = JsonObejctTestType()
+            root.object = JSONObject0(first: JSONObject1(second: JSONObject2(third: JSONObject3(value: "initial"))))
 
             XCTAssertEqual(root.debugDescription,
                            """
-                           {"object":{"array":[{"id":200}],"id":100,"type":"struct"}}
+                           {"object":{"first":{"second":{"third":{"value":"initial"}}}}}
                            """)
 
-            let array = root[keyPath: "object/.^/array"] as? JSONArray
-            array!.append(JsonArrayTestType(id: 300))
+            guard let third = root[keyPath: "object/.^/first/.^/second/.^/third"] as? JSONObject else {
+                XCTFail()
+                return
+            }
+
+            third.value = "changed"
 
             XCTAssertEqual(root.debugDescription,
                            """
-                           {"object":{"array":[{"id":200},{"id":300}],"id":100,"type":"struct"}}
+                           {"object":{"first":{"second":{"third":{"value":"changed"}}}}}
                            """)
         }
     }
