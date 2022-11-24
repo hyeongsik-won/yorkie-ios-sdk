@@ -20,11 +20,12 @@ swift package --allow-writing-to-directory $OUTPUT_PATH \
     --transform-for-static-hosting \
     --hosting-base-path $HOSTING_BASE_PATH
 #cd $CLONED_DIR
+echo "git checkout $API_REF_BRANCH"
 git checkout $API_REF_BRANCH
 rm -rf docs
 mv $OUTPUT_PATH docs
 #git add $OUTPUT_SUB_PATH
 git add docs
 git commit -m "Update API reference for version ${TAG}"
-git push
+git push origin HEAD:$API_REF_BRANCH
 #rm -rf $CLONED_DIR
