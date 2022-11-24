@@ -1,0 +1,15 @@
+name: Publish API reference
+
+on:
+  push:
+    tags:
+    - '*'
+
+jobs:
+  publishing_api_ref:
+    runs-on: macos-12
+    steps:
+    - uses: actions/checkout@v3
+    - name: Publish API reference documentation
+      run: ./publish-api-ref.sh $GITHUB_REF_NAME
+

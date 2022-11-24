@@ -18,7 +18,7 @@ import Foundation
 
 /// ``JSONObjectable`` provide a way to make a dictionary including members of a type confirming ``JSONObjectable``.
 public protocol JSONObjectable: Codable {
-    /// The members of ``JSONObjectable/excludedMembers`` is not included in a dictionary made by ``JSONObjectable/toJsonObject``.
+    /// The members of excludedMembers is not included in a dictionary made by toJsonObject.
     var excludedMembers: [String] { get }
 }
 
