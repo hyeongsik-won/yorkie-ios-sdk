@@ -4,7 +4,8 @@ API_REF_BRANCH=api-ref-doc
 CLONED_DIR="doc-repo"
 HOSTING_BASE_PATH="hyeongsik-won/playground"
 OUTPUT_SUB_PATH="docs"
-OUTPUT_PATH="${CLONED_DIR}/${OUTPUT_SUB_PATH}"
+#OUTPUT_PATH="${CLONED_DIR}/${OUTPUT_SUB_PATH}"
+OUTPUT_PATH="doc-temp"
 
 #rm -rf $CLONED_DIR
 #git clone $HOST_URL $CLONED_DIR
