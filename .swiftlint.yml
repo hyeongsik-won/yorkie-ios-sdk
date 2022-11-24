@@ -1,0 +1,28 @@
+included:
+  - Sources
+  - Tests
+excluded:
+  - Sources/API
+opt_in_rules:
+  - overridden_super_call
+  - private_outlet
+  - prohibited_super_call
+  - first_where
+  - closure_spacing
+  - unneeded_parentheses_in_closure_argument
+  - redundant_nil_coalescing
+  - explicit_init
+  - contains_over_first_not_nil
+disabled_rules:
+  - line_length
+  - file_length
+  - opening_brace
+opt_in_rules:
+  - empty_count
+# Rewrited rules
+cyclomatic_complexity: 
+  warning: 25
+function_body_length: 100
+type_body_length: 1000
+identifier_name:
+  min_length: 2
