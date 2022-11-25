@@ -18,11 +18,7 @@ jobs:
             --output-path doc-temp  \
             --transform-for-static-hosting \
             --hosting-base-path hyeongsik-won/playground
-    - uses: actions/checkout@v3
-      with:
-        ref: api-ref-doc
-    - name: Publish API reference doc
-      run: |
+	git checkout api-ref-doc
         rm -rf docs
         mv doc-temp docs
         git add docs
