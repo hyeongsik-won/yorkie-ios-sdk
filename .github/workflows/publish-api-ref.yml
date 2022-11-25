@@ -18,7 +18,7 @@ jobs:
             --output-path doc-temp  \
             --transform-for-static-hosting \
             --hosting-base-path hyeongsik-won/playground
-	git checkout api-ref-doc
+        git checkout api-ref-doc
         rm -rf docs
         mv doc-temp docs
         git add docs
