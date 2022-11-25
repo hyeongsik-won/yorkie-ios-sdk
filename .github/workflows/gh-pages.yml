@@ -7,7 +7,7 @@ on:
 
 env:
   OUTPUT_PATH: ../docs-temp
-  HOSTING_BASE_PATH: hyeongsik-won/playground
+  HOSTING_BASE_PATH: yorkie-ios-sdk
 
 jobs:
   build:
