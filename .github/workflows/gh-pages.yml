@@ -25,7 +25,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         ref: gh-pages
-    - name: Publish API reference doc
+    - name: Push API reference doc
       run: |
         rm -rf docs
         mv $OUTPUT_PATH docs
