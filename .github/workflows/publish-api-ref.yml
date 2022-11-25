@@ -18,7 +18,7 @@ jobs:
             --output-path ../doc-temp  \
             --transform-for-static-hosting \
             --hosting-base-path hyeongsik-won/playground
-   - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
       with:
         ref: api-ref-doc
     - name: Publish API reference doc
@@ -28,4 +28,3 @@ jobs:
         git add docs
         git commit -m "Updates docs for $GITHUB_REF_NAME"
         git push
-
