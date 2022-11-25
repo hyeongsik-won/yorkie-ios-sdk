@@ -9,8 +9,8 @@ jobs:
   build:
     runs-on: macos-12
     steps:
+    - uses: actions/checkout@v3
     - name: Generate API reference doc
-      uses: actions/checkout@v3
       run: |
         swift package --allow-writing-to-directory doc-temp \
             generate-documentation --target Yorkie \
@@ -18,10 +18,10 @@ jobs:
             --output-path doc-temp  \
             --transform-for-static-hosting \
             --hosting-base-path hyeongsik-won/playground
-    - name: Publish API reference doc
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
       with:
-              ref: api-ref-doc
+        ref: api-ref-doc
+    - name: Publish API reference doc
       run: |
         rm -rf docs
         mv doc-temp docs
