@@ -19,9 +19,9 @@ jobs:
         swift package --allow-writing-to-directory $DOC_ARCH \
             generate-documentation --target Yorkie \
             --output-path $DOC_ARCH
-        zip -r $DOC_ARCH_ZIP $DOC_ARCH
+        zip -r Yorkie.doccarchive.zip $DOC_ARCH
     - name: Release
       uses: softprops/action-gh-release@v1
       if: startsWith(github.ref, 'refs/tags/')
       with:
-        files: $DOC_ARCH_ZIP
+        files: Yorkie.doccarchive.zip
