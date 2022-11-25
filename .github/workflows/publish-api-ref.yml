@@ -6,26 +6,25 @@ on:
     - '*'
 
 jobs:
-  publishing_api_ref:
+  build:
     runs-on: macos-12
     steps:
     - uses: actions/checkout@v3
     - name: Generate API reference doc
       run: |
-	swift package --allow-writing-to-directory doc-temp \
-	    generate-documentation --target Yorkie \
-	    --disable-indexing \
-	    --output-path doc-temp  \
-	    --transform-for-static-hosting \
-	    --hosting-base-path hyeongsik-won/playground
+        swift package --allow-writing-to-directory doc-temp \
+            generate-documentation --target Yorkie \
+            --disable-indexing \
+            --output-path doc-temp  \
+            --transform-for-static-hosting \
+            --hosting-base-path hyeongsik-won/playground
     - uses: actions/checkout@v3
       with:
-	ref: api-ref-doc
-    - name: Push API reference doc
-      run: |
-	rm -rf docs
-	mv doc-temp docs
-	git add docs
-	git commit -m "Updates docs for $GITHUB_REF_NAME"
-	git push
+	      ref: api-ref-doc
+    - run: |
+        rm -rf docs
+        mv doc-temp docs
+        git add docs
+        git commit -m "Updates docs for $GITHUB_REF_NAME"
+        git push
 
